@@ -1,10 +1,21 @@
-package com.lavishlife.tools;
+package com.lavishlife.tools.bulkemailer;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
+
+import org.apache.camel.spring.boot.CamelSpringBootApplicationController;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.exception.VelocityException;
+import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.ui.velocity.VelocityEngineFactory;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -18,9 +29,8 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
-import com.google.api.services.gmail.model.Label;
-import com.google.api.services.gmail.model.ListLabelsResponse;
 
+@SpringBootApplication
 public class Quickstart {
     /** Application name. */
     private static final String APPLICATION_NAME =
@@ -46,7 +56,7 @@ public class Quickstart {
      * at ~/.credentials/gmail-java-quickstart
      */
     private static final List<String> SCOPES =
-        Arrays.asList(GmailScopes.GMAIL_LABELS);
+        Arrays.asList(GmailScopes.MAIL_GOOGLE_COM);
 
     static {
         try {
@@ -69,7 +79,7 @@ public class Quickstart {
             Quickstart.class.getResourceAsStream("/client_secret.json");
         GoogleClientSecrets clientSecrets =
             GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-
+        System.out.println("Data Store located here: --> " + DATA_STORE_DIR);
         // Build flow and trigger user authorization request.
         GoogleAuthorizationCodeFlow flow =
                 new GoogleAuthorizationCodeFlow.Builder(
@@ -89,31 +99,30 @@ public class Quickstart {
      * @return an authorized Gmail client service
      * @throws IOException
      */
-    public static Gmail getGmailService() throws IOException {
+    @Bean
+    public static Gmail gmail() throws IOException {
         Credential credential = authorize();
         return new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
+    
+    @SuppressWarnings("deprecation")
+	@Bean
+	public VelocityEngine velocity() throws VelocityException, IOException {
+		VelocityEngineFactory factory = new VelocityEngineFactory();
+		VelocityEngine ve = factory.createVelocityEngine();
+		ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
+		ve.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
+		return ve;
+	}
 
     public static void main(String[] args) throws IOException {
-        // Build a new authorized API client service.
-        Gmail service = getGmailService();
-
-        // Print the labels in the user's account.
-        String user = "me";
-        ListLabelsResponse listResponse =
-            service.users().labels().list(user).execute();
-        List<Label> labels = listResponse.getLabels();
-        if (labels.size() == 0) {
-            System.out.println("No labels found.");
-        } else {
-            System.out.println("Labels:");
-            for (Label label : labels) {
-                System.out.printf("- %s\n", label.getName());
-                System.out.println("Heelo");
-            }
-        }
+    	 ApplicationContext applicationContext = new SpringApplication(Quickstart.class).run(args);
+//    	 Arrays.stream(applicationContext.getBeanDefinitionNames()).forEach(System.out::println);
+    	 CamelSpringBootApplicationController applicationController = applicationContext
+ 				.getBean(CamelSpringBootApplicationController.class);
+ 		applicationController.run();
     }
 
 }

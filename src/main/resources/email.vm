@@ -1,0 +1,10 @@
+# in the com/foo/package
+<html>
+    <body>
+        <h3>Hi ${user.name}, welcome to the Lavish Life where all your dreams come true!</h3>
+
+        <div>
+            Your email address is <a href="mailto:${user.email}">${user.emailAddress}</a>.
+        </div>
+    </body>
+</html>
