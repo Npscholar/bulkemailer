@@ -14,6 +14,7 @@ import javax.mail.internet.MimeMessage;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.http.HttpHeaders;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -56,29 +57,14 @@ public class EmailContactProcessor implements Processor {
 //	}
 
 	public void createEmail(final Contact contact) throws IOException {
-
-        // Print the labels in the user's account.
-        String user = "me";
-        ListLabelsResponse listResponse =
-            gmail.users().labels().list(user).execute();
-        List<Label> labels = listResponse.getLabels();
-        if (labels.size() == 0) {
-            System.out.println("No labels found.");
-        } else {
-            System.out.println("Labels:");
-            for (Label label : labels) {
-                System.out.printf("- %s\n", label.getName());
-            }
-        }
-        
-        
+      
 		HashMap<String, Object> model = new HashMap<String, Object>();
 		model.put("user.name", contact.getName());
 		model.put("user.email", contact.getEmail());
 		String text = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "src/main/resources/email.vm", model);
 		
 
-		String to = "jonbon1992@aol.com";
+		String to = "reimaginerei@gmail.com";
 		String from = "npscholar@gmail.com";
 		String host = "localhost";
 		Properties properties = System.getProperties();
@@ -94,9 +80,13 @@ public class EmailContactProcessor implements Processor {
 			// Set To: header field of the header.
 			mime.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(to));
 			// Set Subject: header field
-			mime.setSubject("I think this message is going to be bland");
+			mime.setSubject("Testing this bulk emailer shit");
 			// Now set the actual message
 			mime.setText("I told you... "+ text);
+			System.out.println(mime.getContentType());
+			//mime content type is set to text/plain by default 
+			mime.setHeader(HttpHeaders.CONTENT_TYPE, "text/html");
+			System.out.println(mime.getContentType());
 			mime.writeTo(baos);
 		} catch (MessagingException e) {
 			e.printStackTrace();
