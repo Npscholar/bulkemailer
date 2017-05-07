@@ -16,7 +16,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
@@ -28,9 +27,6 @@ import com.lavishlife.tools.bulkemailer.model.Contact;
 
 @Component
 public class EmailContactProcessor implements Processor {
-
-	@Autowired
-	private JavaMailSender mailSender;
 
 	@Autowired
 	private VelocityEngine velocityEngine;
@@ -61,19 +57,6 @@ public class EmailContactProcessor implements Processor {
 
 	public void createEmail(final Contact contact) throws IOException {
 
-		/*	HtmlEmail email = new HtmlEmail();
-//		// email.setHostName("mail.myserver.com");
-//		email.addTo("npscholar@gmail.com", "Norbert");
-//		email.setFrom("reimaginerei@gmail", "Me");
-//		email.setSubject("Test email with inline image");
-//
-//		// embed the image and get the content id
-//		URL url = new URL("http://www.apache.org/images/asf_logo_wide.gif");
-//		String cid = email.embed(url, "Apache logo");
-//		email.setHtmlMsg(text);
- */
-		
-
         // Print the labels in the user's account.
         String user = "me";
         ListLabelsResponse listResponse =
@@ -90,10 +73,12 @@ public class EmailContactProcessor implements Processor {
         
         
 		HashMap<String, Object> model = new HashMap<String, Object>();
+		model.put("user.name", contact.getName());
+		model.put("user.email", contact.getEmail());
 		String text = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "src/main/resources/email.vm", model);
 		
 
-		String to = "ReimagineRei@gmail.com";
+		String to = "jonbon1992@aol.com";
 		String from = "npscholar@gmail.com";
 		String host = "localhost";
 		Properties properties = System.getProperties();
