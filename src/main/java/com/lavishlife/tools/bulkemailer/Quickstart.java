@@ -7,15 +7,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.camel.spring.boot.CamelSpringBootApplicationController;
-import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.exception.VelocityException;
-import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.ui.velocity.VelocityEngineFactory;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -107,15 +102,6 @@ public class Quickstart {
                 .build();
     }
     
-    @SuppressWarnings("deprecation")
-	@Bean
-	public VelocityEngine velocity() throws VelocityException, IOException {
-		VelocityEngineFactory factory = new VelocityEngineFactory();
-		VelocityEngine ve = factory.createVelocityEngine();
-		ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
-		ve.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-		return ve;
-	}
 
     public static void main(String[] args) throws IOException {
     	 ApplicationContext applicationContext = new SpringApplication(Quickstart.class).run(args);
